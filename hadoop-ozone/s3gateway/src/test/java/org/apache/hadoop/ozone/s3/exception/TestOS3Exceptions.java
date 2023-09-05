@@ -20,8 +20,9 @@ package org.apache.hadoop.ozone.s3.exception;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.apache.hadoop.ozone.web.utils.OzoneUtils;
 import org.junit.jupiter.api.Test;
+
+import static org.apache.hadoop.ozone.s3.util.S3Utils.getRequestID;
 
 /**
  * This class tests OS3Exception class.
@@ -32,7 +33,7 @@ public class TestOS3Exceptions {
   public void testOS3Exceptions() {
     OS3Exception ex = new OS3Exception("AccessDenied", "Access Denied",
         403);
-    String requestId = OzoneUtils.getRequestID();
+    String requestId = getRequestID();
     ex = S3ErrorTable.newError(ex, "bucket");
     ex.setRequestId(requestId);
     String val = ex.toXml();
