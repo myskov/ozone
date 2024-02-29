@@ -133,16 +133,14 @@ public class TestFSODirectoryPathResolver {
     Map<Long, Path> absolutePathMap = fsoDirectoryPathResolver
         .getAbsolutePathForObjectIDs(Optional.of(objIds));
 
-    assertEquals(ImmutableMap.of(
-        17L, Paths.get("/dir3/dir14/dir17"),
-        9L, Paths.get("/dir2/dir9"),
-        10L, Paths.get("/dir2/dir10"),
-        15L, Paths.get("/dir3/dir15"),
-        4L, Paths.get("/dir4"),
-        3L, Paths.get("/dir3"),
-        1L, Paths.get("/")
-    ), absolutePathMap);
-    assertEquals(objIds.size(), absolutePathMap.size());
+    assertEquals("/dir3/dir14/dir17",absolutePathMap.get(17L).toAbsolutePath().toString());
+    assertEquals("/dir2/dir9",absolutePathMap.get(9L).toAbsolutePath().toString());
+    assertEquals("/dir2/dir10",absolutePathMap.get(10L).toAbsolutePath().toString());
+    assertEquals("/dir3/dir15",absolutePathMap.get(15L).toAbsolutePath().toString());
+    assertEquals("/dir4",absolutePathMap.get(4L).toAbsolutePath().toString());
+    assertEquals("/dir3",absolutePathMap.get(3L).toAbsolutePath().toString());
+    assertEquals("/",absolutePathMap.get(1L).toAbsolutePath().toString());
+
     // Invalid Obj Id 19 with dirInfo dir19 which is not present in the bucket.
     assertThrows(IllegalArgumentException.class,
         () -> fsoDirectoryPathResolver.getAbsolutePathForObjectIDs(

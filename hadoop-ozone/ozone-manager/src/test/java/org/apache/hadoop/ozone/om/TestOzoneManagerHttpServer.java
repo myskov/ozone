@@ -22,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InvalidObjectException;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
@@ -65,7 +67,9 @@ public class TestOzoneManagerHttpServer {
 
     // Create metadata directory
     ozoneMetadataDirectory = new File(baseDir.getPath(), "metadata");
-    ozoneMetadataDirectory.mkdirs();
+    boolean metadataDirCreated = ozoneMetadataDirectory.mkdirs();
+
+    assertTrue(metadataDirCreated);
 
     // Initialize the OzoneConfiguration
     conf = new OzoneConfiguration();
@@ -154,7 +158,7 @@ public class TestOzoneManagerHttpServer {
       URLConnection conn = connectionFactory.openConnection(url);
       conn.connect();
       conn.getContent();
-    } catch (Exception e) {
+    } catch (IOException e) {
       return false;
     }
     return true;

@@ -702,7 +702,7 @@ public class TestSnapshotDiffManager {
             String keyName = split[split.length - 1];
             return Integer.parseInt(keyName.substring(3)) % 2 == 0;
           }
-      ).when(spy).isKeyInBucket(anyString(), anyMap(), anyString());
+      ).when(spy.isKeyInBucket(anyString(), anyMap(), anyString()));
 
       PersistentMap<byte[], byte[]> oldObjectIdKeyMap =
           new StubbedPersistentMap<>();

@@ -45,7 +45,6 @@ public class TestOMDelegationTokenRequest {
   private Path folder;
 
   protected OzoneManager ozoneManager;
-  protected OMMetrics omMetrics;
   protected OMMetadataManager omMetadataManager;
   protected ConfigurationSource conf;
 

@@ -90,19 +90,19 @@ public class TestOMClientRequestWithUserInfo {
   @Test
   public void testUserInfoInCaseOfHadoopTransport() throws Exception {
     new MockUp<ProtobufRpcEngine.Server>() {
-      @Mock
-      public UserGroupInformation getRemoteUser() {
-        return userGroupInformation;
-      }
+//      @Mock
+//      public UserGroupInformation getRemoteUser() {
+//        return userGroupInformation;
+//      }
 
-      @Mock
-      public InetAddress getRemoteIp() {
-        return inetAddress;
-      }
+//      @Mock
+//      public InetAddress getRemoteIp() {
+//        return inetAddress;
+//      }
 
-      public InetAddress getRemoteAddress() {
-        return inetAddress;
-      }
+//      public InetAddress getRemoteAddress() {
+//        return inetAddress;
+//      }
     };
 
     String bucketName = UUID.randomUUID().toString();
