@@ -67,6 +67,7 @@ import org.apache.ozone.test.GenericTestUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
@@ -95,7 +96,8 @@ public class TestSecureOzoneRpcClient extends TestOzoneRpcClient {
   private static StorageContainerLocationProtocolClientSideTranslatorPB
       storageContainerLocationClient;
 
-  private static File testDir;
+  @TempDir private static File tempDir;
+
   private static OzoneConfiguration conf;
 
   /**
@@ -107,14 +109,12 @@ public class TestSecureOzoneRpcClient extends TestOzoneRpcClient {
    */
   @BeforeAll
   public static void init() throws Exception {
-    testDir = GenericTestUtils.getTestDir(
-        TestSecureOzoneRpcClient.class.getSimpleName());
     OzoneManager.setTestSecureOmFlag(true);
     conf = new OzoneConfiguration();
-    conf.set(HddsConfigKeys.OZONE_METADATA_DIRS, testDir.getAbsolutePath());
+    conf.set(HddsConfigKeys.OZONE_METADATA_DIRS, tempDir.getAbsolutePath());
     conf.setInt(ScmConfigKeys.OZONE_SCM_PIPELINE_OWNER_CONTAINER_COUNT, 1);
     conf.setBoolean(HddsConfigKeys.HDDS_BLOCK_TOKEN_ENABLED, true);
-    conf.set(OZONE_METADATA_DIRS, testDir.getAbsolutePath());
+    conf.set(OZONE_METADATA_DIRS, tempDir.getAbsolutePath());
     conf.setBoolean(OzoneConfigKeys.OZONE_ACL_ENABLED, true);
     conf.set(OzoneConfigKeys.OZONE_ACL_AUTHORIZER_CLASS,
         OzoneConfigKeys.OZONE_ACL_AUTHORIZER_CLASS_NATIVE);

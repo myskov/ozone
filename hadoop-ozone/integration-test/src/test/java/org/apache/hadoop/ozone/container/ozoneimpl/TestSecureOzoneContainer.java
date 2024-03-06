@@ -40,7 +40,6 @@ import org.apache.hadoop.ozone.client.SecretKeyTestClient;
 import org.apache.hadoop.ozone.container.common.ContainerTestUtils;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.security.token.Token;
-import org.apache.ozone.test.GenericTestUtils;
 import org.apache.ratis.util.ExitUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -105,9 +104,7 @@ class TestSecureOzoneContainer {
   @BeforeEach
   void setup() throws Exception {
     conf = new OzoneConfiguration();
-    String ozoneMetaPath =
-        GenericTestUtils.getTempPath("ozoneMeta");
-    conf.set(OZONE_METADATA_DIRS, ozoneMetaPath);
+    conf.set(OZONE_METADATA_DIRS, tempFolder.toString());
     caClient = new CertificateClientTestImpl(conf);
     secretKeyClient = new SecretKeyTestClient();
     secretManager = new ContainerTokenSecretManager(

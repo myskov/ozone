@@ -36,6 +36,7 @@ import org.apache.ratis.server.RaftServer;
 import org.apache.ratis.server.raftlog.RaftLog;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -53,7 +54,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class TestOmBucketReadWriteFileOps {
 
-  private String path;
+  @TempDir private File tempDir;
+
   private OzoneConfiguration conf = null;
   private MiniOzoneCluster cluster = null;
   private ObjectStore store = null;
@@ -63,22 +65,17 @@ public class TestOmBucketReadWriteFileOps {
 
   @BeforeEach
   public void setup() {
-    path = GenericTestUtils
-        .getTempPath(TestOmBucketReadWriteFileOps.class.getSimpleName());
     GenericTestUtils.setLogLevel(RaftLog.LOG, Level.DEBUG);
     GenericTestUtils.setLogLevel(RaftServer.LOG, Level.DEBUG);
-    File baseDir = new File(path);
-    baseDir.mkdirs();
   }
 
   /**
    * Shutdown MiniDFSCluster.
    */
-  private void shutdown() throws IOException {
+  private void shutdown() {
     IOUtils.closeQuietly(client);
     if (cluster != null) {
       cluster.shutdown();
-      FileUtils.deleteDirectory(new File(path));
     }
   }
 
@@ -107,8 +104,7 @@ public class TestOmBucketReadWriteFileOps {
   public void testOmBucketReadWriteFileOps() throws Exception {
     try {
       startCluster();
-      FileOutputStream out = FileUtils.openOutputStream(new File(path,
-          "conf"));
+      FileOutputStream out = FileUtils.openOutputStream(tempDir);
       cluster.getConf().writeXml(out);
       out.getFD().sync();
       out.close();
@@ -154,7 +150,7 @@ public class TestOmBucketReadWriteFileOps {
     volume.createBucket(parameterBuilder.bucketName);
     String rootPath = "o3fs://" + parameterBuilder.bucketName + "." +
             parameterBuilder.volumeName + parameterBuilder.prefixFilePath;
-    String confPath = new File(path, "conf").getAbsolutePath();
+    String confPath = tempDir.getAbsolutePath();
     new Freon().execute(
         new String[]{"-conf", confPath, "obrwf", "-P", rootPath,
             "-r", String.valueOf(parameterBuilder.fileCountForRead),

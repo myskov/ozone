@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -60,6 +61,7 @@ import org.apache.ozone.test.GenericTestUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.hadoop.hdds.client.ReplicationFactor.ONE;
@@ -76,6 +78,9 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class TestOzoneRpcClientWithRatis extends TestOzoneRpcClientAbstract {
   private static OzoneConfiguration conf;
+
+  @TempDir private Path tempDir;
+
   /**
    * Create a MiniOzoneCluster for testing.
    * Ozone is made active by setting OZONE_ENABLED = true.
@@ -219,16 +224,11 @@ public class TestOzoneRpcClientWithRatis extends TestOzoneRpcClientAbstract {
 
   @Test
   public void testUploadWithStreamAndMemoryMappedBuffer() throws IOException {
-    // create a local dir
-    final String dir = GenericTestUtils.getTempPath(
-        getClass().getSimpleName());
-    GenericTestUtils.assertDirCreation(new File(dir));
-
     // create a local file
     final int chunkSize = 1024;
     final byte[] data = new byte[8 * chunkSize];
     ThreadLocalRandom.current().nextBytes(data);
-    final File file = new File(dir, "data");
+    final File file = new File(tempDir.toFile(), "data");
     try (FileOutputStream out = new FileOutputStream(file)) {
       out.write(data);
     }

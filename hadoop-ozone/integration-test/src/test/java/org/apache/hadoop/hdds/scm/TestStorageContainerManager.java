@@ -21,7 +21,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.hadoop.hdds.HddsConfigKeys;
 import org.apache.hadoop.hdds.HddsUtils;
@@ -99,6 +98,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,7 +106,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -161,6 +160,8 @@ public class TestStorageContainerManager {
   private static XceiverClientManager xceiverClientManager;
   private static final Logger LOG = LoggerFactory.getLogger(
             TestStorageContainerManager.class);
+
+  @TempDir private Path tempDir;
 
   @BeforeAll
   public static void setup() throws IOException {
@@ -570,10 +571,7 @@ public class TestStorageContainerManager {
   @Test
   public void testSCMInitialization() throws Exception {
     OzoneConfiguration conf = new OzoneConfiguration();
-    final String path = GenericTestUtils.getTempPath(
-        UUID.randomUUID().toString());
-    Path scmPath = Paths.get(path, "scm-meta");
-    conf.set(HddsConfigKeys.OZONE_METADATA_DIRS, scmPath.toString());
+    conf.set(HddsConfigKeys.OZONE_METADATA_DIRS, tempDir.toString());
 
     UUID clusterId = UUID.randomUUID();
     String testClusterId = clusterId.toString();
@@ -594,10 +592,7 @@ public class TestStorageContainerManager {
     OzoneConfiguration conf = new OzoneConfiguration();
     conf.setBoolean(ScmConfigKeys.OZONE_SCM_HA_ENABLE_KEY, true);
     conf.set(ScmConfigKeys.OZONE_SCM_PIPELINE_CREATION_INTERVAL, "10s");
-    final String path = GenericTestUtils.getTempPath(
-        UUID.randomUUID().toString());
-    Path scmPath = Paths.get(path, "scm-meta");
-    conf.set(HddsConfigKeys.OZONE_METADATA_DIRS, scmPath.toString());
+    conf.set(HddsConfigKeys.OZONE_METADATA_DIRS, tempDir.toString());
 
     final UUID clusterId = UUID.randomUUID();
     // This will initialize SCM
@@ -610,10 +605,7 @@ public class TestStorageContainerManager {
   @Test
   public void testSCMReinitialization() throws Exception {
     OzoneConfiguration conf = new OzoneConfiguration();
-    final String path = GenericTestUtils.getTempPath(
-        UUID.randomUUID().toString());
-    Path scmPath = Paths.get(path, "scm-meta");
-    conf.set(HddsConfigKeys.OZONE_METADATA_DIRS, scmPath.toString());
+    conf.set(HddsConfigKeys.OZONE_METADATA_DIRS, tempDir.toString());
     //This will set the cluster id in the version file
     MiniOzoneCluster cluster =
         MiniOzoneCluster.newBuilder(conf).setNumDatanodes(3).build();
@@ -635,10 +627,7 @@ public class TestStorageContainerManager {
   //@Test
   public void testSCMReinitializationWithHAUpgrade() throws Exception {
     OzoneConfiguration conf = new OzoneConfiguration();
-    final String path = GenericTestUtils.getTempPath(
-        UUID.randomUUID().toString());
-    Path scmPath = Paths.get(path, "scm-meta");
-    conf.set(HddsConfigKeys.OZONE_METADATA_DIRS, scmPath.toString());
+    conf.set(HddsConfigKeys.OZONE_METADATA_DIRS, tempDir.toString());
     //This will set the cluster id in the version file
     final UUID clusterId = UUID.randomUUID();
       // This will initialize SCM
@@ -702,10 +691,7 @@ public class TestStorageContainerManager {
   public void testSCMReinitializationWithHAEnabled() throws Exception {
     OzoneConfiguration conf = new OzoneConfiguration();
     conf.setBoolean(ScmConfigKeys.OZONE_SCM_HA_ENABLE_KEY, false);
-    final String path = GenericTestUtils.getTempPath(
-        UUID.randomUUID().toString());
-    Path scmPath = Paths.get(path, "scm-meta");
-    conf.set(HddsConfigKeys.OZONE_METADATA_DIRS, scmPath.toString());
+    conf.set(HddsConfigKeys.OZONE_METADATA_DIRS, tempDir.toString());
     //This will set the cluster id in the version file
     MiniOzoneCluster cluster =
         MiniOzoneCluster.newBuilder(conf).setNumDatanodes(3).build();
@@ -732,10 +718,7 @@ public class TestStorageContainerManager {
   @Test
   void testSCMInitializationFailure() {
     OzoneConfiguration conf = new OzoneConfiguration();
-    final String path =
-        GenericTestUtils.getTempPath(UUID.randomUUID().toString());
-    Path scmPath = Paths.get(path, "scm-meta");
-    conf.set(HddsConfigKeys.OZONE_METADATA_DIRS, scmPath.toString());
+    conf.set(HddsConfigKeys.OZONE_METADATA_DIRS, tempDir.toString());
 
     Exception e = assertThrows(SCMException.class, () -> HddsTestUtils.getScmSimple(conf));
     assertThat(e).hasMessageContaining("SCM not initialized due to storage config failure");
@@ -744,30 +727,23 @@ public class TestStorageContainerManager {
   @Test
   public void testScmInfo() throws Exception {
     OzoneConfiguration conf = new OzoneConfiguration();
-    final String path =
-        GenericTestUtils.getTempPath(UUID.randomUUID().toString());
-    try {
-      Path scmPath = Paths.get(path, "scm-meta");
-      conf.set(HddsConfigKeys.OZONE_METADATA_DIRS, scmPath.toString());
-      SCMStorageConfig scmStore = new SCMStorageConfig(conf);
-      String clusterId = UUID.randomUUID().toString();
-      String scmId = UUID.randomUUID().toString();
-      scmStore.setClusterId(clusterId);
-      scmStore.setScmId(scmId);
-      // writes the version file properties
-      scmStore.initialize();
-      StorageContainerManager scm = HddsTestUtils.getScmSimple(conf);
-      //Reads the SCM Info from SCM instance
-      ScmInfo scmInfo = scm.getClientProtocolServer().getScmInfo();
-      assertEquals(clusterId, scmInfo.getClusterId());
-      assertEquals(scmId, scmInfo.getScmId());
+    conf.set(HddsConfigKeys.OZONE_METADATA_DIRS, tempDir.toString());
+    SCMStorageConfig scmStore = new SCMStorageConfig(conf);
+    String clusterId = UUID.randomUUID().toString();
+    String scmId = UUID.randomUUID().toString();
+    scmStore.setClusterId(clusterId);
+    scmStore.setScmId(scmId);
+    // writes the version file properties
+    scmStore.initialize();
+    StorageContainerManager scm = HddsTestUtils.getScmSimple(conf);
+    //Reads the SCM Info from SCM instance
+    ScmInfo scmInfo = scm.getClientProtocolServer().getScmInfo();
+    assertEquals(clusterId, scmInfo.getClusterId());
+    assertEquals(scmId, scmInfo.getScmId());
 
-      String expectedVersion = HddsVersionInfo.HDDS_VERSION_INFO.getVersion();
-      String actualVersion = scm.getSoftwareVersion();
-      assertEquals(expectedVersion, actualVersion);
-    } finally {
-      FileUtils.deleteQuietly(new File(path));
-    }
+    String expectedVersion = HddsVersionInfo.HDDS_VERSION_INFO.getVersion();
+    String actualVersion = scm.getSoftwareVersion();
+    assertEquals(expectedVersion, actualVersion);
   }
 
   /**

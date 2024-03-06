@@ -64,7 +64,6 @@ import org.apache.hadoop.ozone.om.exceptions.OMException;
 import org.apache.hadoop.ozone.om.helpers.BucketLayout;
 import org.apache.hadoop.ozone.om.helpers.OzoneFileStatus;
 import org.apache.hadoop.security.UserGroupInformation;
-import org.apache.ozone.test.GenericTestUtils;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.hadoop.ozone.om.TrashPolicyOzone;
 
@@ -101,6 +100,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
@@ -125,11 +125,12 @@ public class TestOzoneShellHA {
 
   private static final String DEFAULT_ENCODING = UTF_8.name();
 
+  @TempDir private static File tempDir;
+
   private static File baseDir;
   private static File testFile;
   private static String testFilePathString;
   private static MiniOzoneHAClusterImpl cluster = null;
-  private static File testDir;
   private static MiniKMS miniKMS;
   private static OzoneClient client;
   private OzoneShell ozoneShell = null;
@@ -157,9 +158,7 @@ public class TestOzoneShellHA {
   }
 
   protected static void startKMS() throws Exception {
-    testDir = GenericTestUtils.getTestDir(
-        TestOzoneShellHA.class.getSimpleName());
-    File kmsDir = new File(testDir, UUID.randomUUID().toString());
+    File kmsDir = new File(tempDir, UUID.randomUUID().toString());
     assertTrue(kmsDir.mkdirs());
     MiniKMS.Builder miniKMSBuilder = new MiniKMS.Builder();
     miniKMS = miniKMSBuilder.setKmsConfDir(kmsDir).build();
@@ -167,12 +166,7 @@ public class TestOzoneShellHA {
   }
 
   protected static void startCluster(OzoneConfiguration conf) throws Exception {
-    String path = GenericTestUtils.getTempPath(
-        TestOzoneShellHA.class.getSimpleName());
-    baseDir = new File(path);
-    baseDir.mkdirs();
-
-    testFilePathString = path + OZONE_URI_DELIMITER + "testFile";
+    testFilePathString = tempDir + OZONE_URI_DELIMITER + "testFile";
     testFile = new File(testFilePathString);
     testFile.getParentFile().mkdirs();
     testFile.createNewFile();
@@ -209,10 +203,6 @@ public class TestOzoneShellHA {
 
     if (baseDir != null) {
       FileUtil.fullyDelete(baseDir, true);
-    }
-
-    if (testDir != null) {
-      FileUtil.fullyDelete(testDir, true);
     }
   }
 

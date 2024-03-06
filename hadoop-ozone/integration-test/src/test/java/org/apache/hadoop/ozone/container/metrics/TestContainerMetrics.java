@@ -17,12 +17,11 @@
 
 package org.apache.hadoop.ozone.container.metrics;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.hdds.DFSConfigKeysLegacy;
 import org.apache.hadoop.hdds.client.BlockID;
 import org.apache.hadoop.hdds.conf.OzoneConfiguration;
@@ -48,7 +47,6 @@ import org.apache.hadoop.ozone.container.common.volume.HddsVolume;
 import org.apache.hadoop.ozone.container.common.volume.MutableVolumeSet;
 import org.apache.hadoop.ozone.container.common.volume.StorageVolume;
 import org.apache.hadoop.ozone.container.common.volume.VolumeSet;
-import org.apache.ozone.test.GenericTestUtils;
 
 import com.google.common.collect.Maps;
 import static org.apache.hadoop.hdds.protocol.MockDatanodeDetails.randomDatanodeDetails;
@@ -59,6 +57,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Test for metrics published by storage containers.
@@ -66,12 +65,13 @@ import org.junit.jupiter.api.Timeout;
 @Timeout(300)
 public class TestContainerMetrics {
 
+  @TempDir private Path tempDir;
+
   @Test
   public void testContainerMetrics() throws Exception {
     XceiverServerGrpc server = null;
     XceiverClientGrpc client = null;
     long containerID = ContainerTestHelper.getTestContainerID();
-    String path = GenericTestUtils.getRandomizedTempPath();
 
     try {
       final int interval = 1;
@@ -85,8 +85,8 @@ public class TestContainerMetrics {
           interval);
 
       DatanodeDetails datanodeDetails = randomDatanodeDetails();
-      conf.set(ScmConfigKeys.HDDS_DATANODE_DIR_KEY, path);
-      conf.set(OzoneConfigKeys.OZONE_METADATA_DIRS, path);
+      conf.set(ScmConfigKeys.HDDS_DATANODE_DIR_KEY, tempDir.toString());
+      conf.set(OzoneConfigKeys.OZONE_METADATA_DIRS, tempDir.toString());
       VolumeSet volumeSet = new MutableVolumeSet(
           datanodeDetails.getUuidString(), conf,
           null, StorageVolume.VolumeType.DATA_VOLUME, null);
@@ -162,11 +162,6 @@ public class TestContainerMetrics {
       }
       if (server != null) {
         server.stop();
-      }
-      // clean up volume dir
-      File file = new File(path);
-      if (file.exists()) {
-        FileUtil.fullyDelete(file);
       }
     }
   }

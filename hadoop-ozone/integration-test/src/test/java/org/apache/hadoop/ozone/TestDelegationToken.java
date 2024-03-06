@@ -117,11 +117,10 @@ public final class TestDelegationToken {
       .getLogger(TestDelegationToken.class);
 
   @TempDir
-  private Path folder;
+  private Path tempDir;
 
   private MiniKdc miniKdc;
   private OzoneConfiguration conf;
-  private File workDir;
   private File scmKeytab;
   private File spnegoKeytab;
   private File omKeyTab;
@@ -159,13 +158,11 @@ public final class TestDelegationToken {
           getPort(OZONE_SCM_SECURITY_SERVICE_PORT_DEFAULT, 100));
 
       DefaultMetricsSystem.setMiniClusterMode(true);
-      final String path = folder.resolve("om-meta").toString();
+      final String path = tempDir.resolve("om-meta").toString();
       Path metaDirPath = Paths.get(path, "om-meta");
       conf.set(OZONE_METADATA_DIRS, metaDirPath.toString());
       conf.setBoolean(OZONE_SECURITY_ENABLED_KEY, true);
       conf.set(HADOOP_SECURITY_AUTHENTICATION, KERBEROS.name());
-
-      workDir = GenericTestUtils.getTestDir(getClass().getSimpleName());
 
       startMiniKdc();
       setSecureConfig();
@@ -208,7 +205,7 @@ public final class TestDelegationToken {
 
   private void startMiniKdc() throws Exception {
     Properties securityProperties = MiniKdc.createConf();
-    miniKdc = new MiniKdc(securityProperties, workDir);
+    miniKdc = new MiniKdc(securityProperties, tempDir.toFile());
     miniKdc.start();
   }
 
@@ -233,10 +230,10 @@ public final class TestDelegationToken {
     conf.set(OZONE_OM_KERBEROS_PRINCIPAL_KEY, "om/" + hostAndRealm);
     conf.set(OZONE_OM_HTTP_KERBEROS_PRINCIPAL_KEY, "HTTP_OM/" + hostAndRealm);
 
-    scmKeytab = new File(workDir, "scm.keytab");
-    spnegoKeytab = new File(workDir, "http.keytab");
-    omKeyTab = new File(workDir, "om.keytab");
-    testUserKeytab = new File(workDir, "testuser.keytab");
+    scmKeytab = new File(tempDir.toString(), "scm.keytab");
+    spnegoKeytab = new File(tempDir.toString(), "http.keytab");
+    omKeyTab = new File(tempDir.toString(), "om.keytab");
+    testUserKeytab = new File(tempDir.toString(), "testuser.keytab");
     testUserPrincipal = "test@" + realm;
 
     conf.set(HDDS_SCM_KERBEROS_KEYTAB_FILE_KEY,
@@ -427,7 +424,7 @@ public final class TestDelegationToken {
     // OM uses scm/host@EXAMPLE.COM to access SCM
     config.set(OZONE_OM_KERBEROS_PRINCIPAL_KEY,
         "scm/" + host + "@" + miniKdc.getRealm());
-    omKeyTab = new File(workDir, "scm.keytab");
+    omKeyTab = new File(tempDir.toString(), "scm.keytab");
     config.set(OZONE_OM_KERBEROS_KEYTAB_FILE_KEY, omKeyTab.getAbsolutePath());
 
     OzoneManager.setTestSecureOmFlag(true);

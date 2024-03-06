@@ -59,13 +59,11 @@ import org.slf4j.event.Level;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.hadoop.hdds.scm.HddsTestUtils.mockRemoteUser;
@@ -103,8 +101,7 @@ public class TestRangerBGSyncService {
   private static final int CHECK_SYNC_MILLIS = 1000;
   private static final int WAIT_SYNC_TIMEOUT_MILLIS = 60000;
 
-  @TempDir
-  private Path folder;
+  @TempDir private Path tempDir;
 
   private MultiTenantAccessController accessController;
   private OMRangerBGSyncService bgSync;
@@ -180,14 +177,11 @@ public class TestRangerBGSyncService {
     // Run as alice, so that Server.getRemoteUser() won't return null.
     mockRemoteUser(ugiAlice);
 
-    String omID = UUID.randomUUID().toString();
-    final String path = GenericTestUtils.getTempPath(omID);
-    Path metaDirPath = Paths.get(path, "om-meta");
-    conf.set(HddsConfigKeys.OZONE_METADATA_DIRS, metaDirPath.toString());
+    conf.set(HddsConfigKeys.OZONE_METADATA_DIRS, tempDir.toString());
 
     omMetrics = OMMetrics.create();
     conf.set(OMConfigKeys.OZONE_OM_DB_DIRS,
-        folder.resolve("om").toAbsolutePath().toString());
+        tempDir.resolve("om").toAbsolutePath().toString());
     // No need to conf.set(OzoneConfigKeys.OZONE_ADMINISTRATORS, ...) here
     //  as we did the trick earlier with mockito.
     omMetadataManager = new OmMetadataManagerImpl(conf, ozoneManager);

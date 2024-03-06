@@ -112,10 +112,13 @@ import org.apache.ozone.test.tag.Flaky;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 class TestOzoneAtRestEncryption {
+
+  @TempDir private static File tempDir;
 
   private static MiniOzoneCluster cluster = null;
   private static MiniKMS miniKMS;
@@ -125,7 +128,6 @@ class TestOzoneAtRestEncryption {
   private static StorageContainerLocationProtocolClientSideTranslatorPB
       storageContainerLocationClient;
 
-  private static File testDir;
   private static OzoneConfiguration conf;
   private static final String TEST_KEY = "key1";
   private static final Random RANDOM = new Random();
@@ -140,10 +142,7 @@ class TestOzoneAtRestEncryption {
 
   @BeforeAll
   static void init() throws Exception {
-    testDir = GenericTestUtils.getTestDir(
-        TestSecureOzoneRpcClient.class.getSimpleName());
-
-    File kmsDir = new File(testDir, UUID.randomUUID().toString());
+    File kmsDir = new File(tempDir, UUID.randomUUID().toString());
     assertTrue(kmsDir.mkdirs());
     MiniKMS.Builder miniKMSBuilder = new MiniKMS.Builder();
     miniKMS = miniKMSBuilder.setKmsConfDir(kmsDir).build();
@@ -153,9 +152,9 @@ class TestOzoneAtRestEncryption {
     conf = new OzoneConfiguration();
     conf.set(CommonConfigurationKeysPublic.HADOOP_SECURITY_KEY_PROVIDER_PATH,
         getKeyProviderURI(miniKMS));
-    conf.set(HddsConfigKeys.OZONE_METADATA_DIRS, testDir.getAbsolutePath());
+    conf.set(HddsConfigKeys.OZONE_METADATA_DIRS, tempDir.getAbsolutePath());
     conf.setBoolean(HddsConfigKeys.HDDS_BLOCK_TOKEN_ENABLED, true);
-    conf.set(OZONE_METADATA_DIRS, testDir.getAbsolutePath());
+    conf.set(OZONE_METADATA_DIRS, tempDir.getAbsolutePath());
     CertificateClientTestImpl certificateClientTest =
         new CertificateClientTestImpl(conf);
 

@@ -20,14 +20,13 @@ package org.apache.hadoop.ozone.genconf;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.hdds.conf.OzoneConfiguration;
-import org.apache.ozone.test.GenericTestUtils;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
@@ -40,7 +39,6 @@ import picocli.CommandLine.ParameterException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -54,7 +52,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * Tests GenerateOzoneRequiredConfigurations.
  */
 public class TestGenerateOzoneRequiredConfigurations {
-  private static File outputBaseDir;
+  @TempDir private static File tempDir;
+
   private static GenerateOzoneRequiredConfigurations genconfTool;
   private static final Logger LOG =
       LoggerFactory.getLogger(TestGenerateOzoneRequiredConfigurations.class);
@@ -72,8 +71,7 @@ public class TestGenerateOzoneRequiredConfigurations {
    */
   @BeforeAll
   public static void init() throws Exception {
-    outputBaseDir = GenericTestUtils.getTestDir();
-    FileUtils.forceMkdir(outputBaseDir);
+    FileUtils.forceMkdir(tempDir);
     genconfTool = new GenerateOzoneRequiredConfigurations();
   }
 
@@ -92,14 +90,6 @@ public class TestGenerateOzoneRequiredConfigurations {
     // restore system streams
     System.setOut(OLD_OUT);
     System.setErr(OLD_ERR);
-  }
-
-  /**
-   * Cleans up the output base directory.
-   */
-  @AfterAll
-  public static void cleanup() throws IOException {
-    FileUtils.deleteDirectory(outputBaseDir);
   }
 
   private void execute(String[] args, String msg)

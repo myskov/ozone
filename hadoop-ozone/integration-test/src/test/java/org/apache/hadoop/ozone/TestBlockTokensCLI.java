@@ -33,6 +33,7 @@ import org.apache.hadoop.ozone.om.OzoneManager;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.ozone.test.GenericTestUtils;
 import org.apache.ratis.util.ExitUtils;
+import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,10 +87,12 @@ import org.junit.jupiter.api.Timeout;
 public final class TestBlockTokensCLI {
   private static final Logger LOG = LoggerFactory
       .getLogger(TestBlockTokensCLI.class);
+
+  @TempDir private static File tempDir;
+
   private static MiniKdc miniKdc;
   private static OzoneAdmin ozoneAdmin;
   private static OzoneConfiguration conf;
-  private static File workDir;
   private static File ozoneKeytab;
   private static File spnegoKeytab;
   private static String host;
@@ -105,8 +108,6 @@ public final class TestBlockTokensCLI {
 
     ExitUtils.disableSystemExit();
 
-    workDir =
-        GenericTestUtils.getTestDir(TestBlockTokens.class.getSimpleName());
     omServiceId = "om-service-test";
     scmServiceId = "scm-service-test";
 
@@ -154,7 +155,7 @@ public final class TestBlockTokensCLI {
 
   private static void startMiniKdc() throws Exception {
     Properties securityProperties = MiniKdc.createConf();
-    miniKdc = new MiniKdc(securityProperties, workDir);
+    miniKdc = new MiniKdc(securityProperties, tempDir);
     miniKdc.start();
   }
 
@@ -176,8 +177,8 @@ public final class TestBlockTokensCLI {
     conf.set(OZONE_OM_HTTP_KERBEROS_PRINCIPAL_KEY, "HTTP_OM/" + hostAndRealm);
     conf.set(DFS_DATANODE_KERBEROS_PRINCIPAL_KEY, "scm/" + hostAndRealm);
 
-    ozoneKeytab = new File(workDir, "scm.keytab");
-    spnegoKeytab = new File(workDir, "http.keytab");
+    ozoneKeytab = new File(tempDir, "scm.keytab");
+    spnegoKeytab = new File(tempDir, "http.keytab");
 
     conf.set(HDDS_SCM_KERBEROS_KEYTAB_FILE_KEY,
         ozoneKeytab.getAbsolutePath());

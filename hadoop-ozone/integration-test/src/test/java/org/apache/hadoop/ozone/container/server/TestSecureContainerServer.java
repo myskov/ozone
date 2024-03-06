@@ -20,6 +20,7 @@ package org.apache.hadoop.ozone.container.server;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -71,7 +72,6 @@ import org.apache.hadoop.ozone.container.common.volume.VolumeSet;
 import org.apache.hadoop.ozone.container.ozoneimpl.ContainerController;
 import org.apache.hadoop.hdds.security.token.OzoneBlockTokenSecretManager;
 import org.apache.hadoop.security.token.Token;
-import org.apache.ozone.test.GenericTestUtils;
 
 import static org.apache.hadoop.hdds.HddsConfigKeys.HDDS_BLOCK_TOKEN_ENABLED;
 import static org.apache.hadoop.hdds.HddsConfigKeys.OZONE_METADATA_DIRS;
@@ -99,10 +99,10 @@ import org.apache.ratis.util.ExitUtils;
 import org.apache.ratis.util.function.CheckedBiConsumer;
 import org.apache.ratis.util.function.CheckedBiFunction;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import static org.apache.ratis.rpc.SupportedRpcType.GRPC;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -115,8 +115,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * Test Container servers when security is enabled.
  */
 public class TestSecureContainerServer {
-  private static final String TEST_DIR
-      = GenericTestUtils.getTestDir("dfs").getAbsolutePath() + File.separator;
+  @TempDir private static Path tempDir;
+
   private static final OzoneConfiguration CONF = new OzoneConfiguration();
   private static CertificateClientTestImpl caClient;
   private static SecretKeyClient secretKeyClient;
@@ -127,7 +127,7 @@ public class TestSecureContainerServer {
   public static void setup() throws Exception {
     DefaultMetricsSystem.setMiniClusterMode(true);
     ExitUtils.disableSystemExit();
-    CONF.set(HddsConfigKeys.HDDS_METADATA_DIR_NAME, TEST_DIR);
+    CONF.set(HddsConfigKeys.HDDS_METADATA_DIR_NAME, tempDir.toString());
     CONF.setBoolean(OZONE_SECURITY_ENABLED_KEY, true);
     CONF.setBoolean(HDDS_BLOCK_TOKEN_ENABLED, true);
     caClient = new CertificateClientTestImpl(CONF);
@@ -140,11 +140,6 @@ public class TestSecureContainerServer {
 
     containerTokenSecretManager = new ContainerTokenSecretManager(
         tokenLifetime, secretKeyClient);
-  }
-
-  @AfterAll
-  public static void deleteTestDir() {
-    FileUtils.deleteQuietly(new File(TEST_DIR));
   }
 
   @AfterEach
@@ -170,9 +165,9 @@ public class TestSecureContainerServer {
       OzoneConfiguration conf) throws IOException {
     ContainerSet containerSet = new ContainerSet(1000);
     conf.set(HDDS_DATANODE_DIR_KEY,
-        Paths.get(TEST_DIR, "dfs", "data", "hdds",
+        Paths.get(tempDir.toString(), "dfs", "data", "hdds",
             RandomStringUtils.randomAlphabetic(4)).toString());
-    conf.set(OZONE_METADATA_DIRS, TEST_DIR);
+    conf.set(OZONE_METADATA_DIRS, tempDir.toString());
     VolumeSet volumeSet = new MutableVolumeSet(dd.getUuidString(), conf, null,
         StorageVolume.VolumeType.DATA_VOLUME, null);
     StateContext context = ContainerTestUtils.getMockContext(dd, conf);
@@ -207,7 +202,7 @@ public class TestSecureContainerServer {
         true);
     conf.setBoolean(
         OzoneConfigKeys.HDDS_CONTAINER_RATIS_DATASTREAM_RANDOM_PORT, true);
-    final String dir = TEST_DIR + dn.getUuid();
+    final String dir = tempDir.toString() + dn.getUuid();
     conf.set(OzoneConfigKeys.HDDS_CONTAINER_RATIS_DATANODE_STORAGE_DIR, dir);
     final ContainerDispatcher dispatcher = createDispatcher(dn,
         UUID.randomUUID(), conf);
