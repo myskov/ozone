@@ -37,10 +37,6 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.javassist</groupId>
-      <artifactId>javassist</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.apache.ozone</groupId>
       <artifactId>hdds-server-framework</artifactId>
     </dependency>
