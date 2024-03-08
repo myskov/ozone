@@ -236,6 +236,12 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
       <artifactId>jmockit</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.ozone</groupId>
+      <artifactId>hdds-annotation-processing</artifactId>
+      <version>${hdds.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

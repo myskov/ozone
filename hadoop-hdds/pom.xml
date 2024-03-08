@@ -171,11 +171,11 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
         <version>${hdds.version}</version>
       </dependency>
 
-      <dependency>
-        <groupId>org.apache.ozone</groupId>
-        <artifactId>hdds-annotation-processing</artifactId>
-        <version>${hdds.version}</version>
-      </dependency>
+<!--      <dependency>-->
+<!--        <groupId>org.apache.ozone</groupId>-->
+<!--        <artifactId>hdds-annotation-processing</artifactId>-->
+<!--        <version>${hdds.version}</version>-->
+<!--      </dependency>-->
 
       <dependency>
         <groupId>org.apache.ozone</groupId>

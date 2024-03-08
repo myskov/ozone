@@ -1633,6 +1633,13 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
             <source>${javac.version}</source>
             <target>${javac.version}</target>
             <useIncrementalCompilation>false</useIncrementalCompilation>
+            <annotationProcessorPaths>
+              <annotationProcessorPath>
+                <groupId>org.apache.ozone</groupId>
+                <artifactId>hdds-annotation-processing</artifactId>
+                <version>${hdds.version}</version>
+              </annotationProcessorPath>
+            </annotationProcessorPaths>
           </configuration>
         </plugin>
         <plugin>
