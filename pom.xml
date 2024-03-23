@@ -389,11 +389,11 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
         <version>${hadoop.version}</version>
         <type>test-jar</type>
       </dependency>
-      <dependency>
-        <groupId>org.apache.hadoop</groupId>
-        <artifactId>hadoop-distcp</artifactId>
-        <version>${hadoop.version}</version>
-      </dependency>
+<!--      <dependency>-->
+<!--        <groupId>org.apache.hadoop</groupId>-->
+<!--        <artifactId>hadoop-distcp</artifactId>-->
+<!--        <version>${hadoop.version}</version>-->
+<!--      </dependency>-->
       <dependency>
         <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-distcp</artifactId>
