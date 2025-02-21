@@ -94,7 +94,6 @@ public class DatanodeSchemaOneDBDefinition
     return DELETED_BLOCKS;
   }
 
-  @Override
   public DBColumnFamilyDefinition<String, BlockData>
       getLastChunkInfoColumnFamily() {
     return null;
